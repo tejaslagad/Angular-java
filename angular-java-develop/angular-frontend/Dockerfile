@@ -26,6 +26,9 @@ RUN rm -rf /usr/share/nginx/html/*
 # Copy built app from build stage
 COPY --from=build /app/dist/angular-frontend /usr/share/nginx/html
 
+# Fix routing issue by providing custom config
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 # Expose port 80
 EXPOSE 80
 
