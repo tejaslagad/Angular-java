@@ -1,9 +1,10 @@
 # Use official Node.js image as the base image
 FROM node:14-alpine as build
 
+RUN npm install -g @angular/cli
+
 # Set the working directory in the container
 WORKDIR /usr/src/app
-RUN npm install -g @angular/cli
 # Copy package.json and package-lock.json (if available)
 COPY package*.json ./
 
