@@ -1,30 +1,33 @@
-# Use official Node.js image as the base image
-FROM node:14-alpine as build
+# Stage 1: Build Angular app
+FROM node:18-bullseye AS build
 
+# Install Angular CLI globally
 RUN npm install -g @angular/cli
 
-# Set the working directory in the container
-WORKDIR /usr/src/app
-# Copy package.json and package-lock.json (if available)
-COPY package*.json ./
+# Set working directory
+WORKDIR /app
 
-# Install project dependencies
+# Copy package files and install dependencies
+COPY package*.json ./
 RUN npm install
 
-# Copy the rest of the application code
+# Copy source files
 COPY . .
 
-# Build the Angular application
-RUN npm run build 
+# Build Angular app
+RUN ng build --configuration production
 
-# Use NGINX as the production server
-FROM nginx:alpine
+# Stage 2: Serve using Nginx
+FROM nginx:1.25
 
-# Copy the built artifact from the previous stage to NGINX web server directory
-COPY --from=build /usr/src/app/dist/angular-frontend /usr/share/nginx/html
+# Remove default nginx page
+RUN rm -rf /usr/share/nginx/html/*
 
-# Expose port 80 to the outside world
+# Copy built app from build stage
+COPY --from=build /app/dist/angular-frontend /usr/share/nginx/html
+
+# Expose port 80
 EXPOSE 80
 
-# Start NGINX server when the container starts
+# Start nginx
 CMD ["nginx", "-g", "daemon off;"]
